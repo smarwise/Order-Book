@@ -14,6 +14,16 @@ class OrderBook(object):
     def isEmpty(self):
         return len(self.queue) == 0
 
+    def findMatchForBuy(self, data):
+        print("Find Match for Buy", data)
+        size = data[2]
+        price = data[3]
+        if (len(self.sell) > 0):
+            for index in range(len(self.sell)):
+                if (int(self.sell[index][0]) == int(orderNumber)):
+                    return index
+
+    #for making array of elements to enter 
     def makeDataForInput(self, orderNumber, data1, data2):
         dataForInput = []
         if (orderNumber == -1):
@@ -24,6 +34,7 @@ class OrderBook(object):
         dataForInput.append(data2)
         return (dataForInput)
 
+    #for finding if list is a buy or sell item and its position in that list
     def findItemInList(self, orderNumber):
         itemDetails = []
         for index in range(len(self.buy)):
@@ -37,20 +48,38 @@ class OrderBook(object):
                     itemDetails.append(index)
         return itemDetails
 
+    def findRightBuyIndex(self, price):
+        if (len(myOrderBook.buy) == 0):
+            return 0
+        else:
+            for index in range(len(self.buy)):
+                if (int(self.buy[index][2]) <= int(price)):
+                    return index
+
+    def findRightSellIndex(self, price):
+        if (len(myOrderBook.sell) == 0):
+            return len(myOrderBook.sell) - 1
+        else:
+            for index in range(len(self.sell)-1, -1, -1):
+                if (int(self.sell[index][2]) <= int(price)):
+                    return index + 1
  
     # for inserting an element in the queue
     def insert(self, data, buyOrSell):
         print(data, buyOrSell)
         dataForInput = []
         if (buyOrSell == "B"):
+            #OrderBook.findMatchForBuy(self, data)
             dataForInput = self.makeDataForInput(-1, data[2], data[3])
-            print(dataForInput)
-            self.buy.append(dataForInput)
+            #enter in queue with price and time priority
+            rightIndex = myOrderBook.findRightBuyIndex(data[3])
+            self.buy.insert(rightIndex, dataForInput)
             print(self.buy)
         elif (buyOrSell == "S"):
             dataForInput = self.makeDataForInput(-1, data[2], data[3])
-            print(dataForInput)
-            self.sell.append(dataForInput)
+            #enter with price and time Priority
+            rightIndex = myOrderBook.findRightSellIndex(data[3])
+            self.sell.insert(rightIndex, dataForInput)
             print(self.sell)
 
     # for modifying queue
@@ -62,7 +91,7 @@ class OrderBook(object):
         index = item[1]
         print("here to modify", newData, index)
         orderNumber = int(orderNumber)
-        myQueue.delete(orderNumber)        
+        myOrderBook.delete(orderNumber)        
         list_ = getattr(self, item[0])
         list_.append(newData)
         print (list_)
@@ -90,19 +119,19 @@ class OrderBook(object):
             return
  
 if __name__ == '__main__':
-    myQueue = OrderBook()
+    myOrderBook = OrderBook()
     while True:
         user_input = input("Please enter request: ")
         # check if it is a valid new order
         if (re.search("\ +[B|S|b|s]\ +[1-9]\d*\ +[1-9]\d*\ *$", user_input)):
-            myQueue.insert(user_input.split(), user_input.split()[1].upper())
+            myOrderBook.insert(user_input.split(), user_input.split()[1].upper())
         # check if it is a valid request to modify
         elif (re.search("[M|m]\ +\d*\ +[1-9]\d*\ +[1-9]\d*\ *$", user_input)):
             elements = user_input.split()
-            myQueue.modify(elements[1], myQueue.makeDataForInput(elements[1], elements[2], elements[3]))
+            myOrderBook.modify(elements[1], myOrderBook.makeDataForInput(elements[1], elements[2], elements[3]))
         # check if it is a valid delete request
         elif (re.search("[D|d]\ +\d*\ *$", user_input)):
-            print(myQueue.delete(user_input.split()[1]))
+            print(myOrderBook.delete(user_input.split()[1]))
         elif (user_input == "quit"):
             print ("Goodbye!")
             exit (0)
