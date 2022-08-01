@@ -5,8 +5,7 @@ class OrderBook(object):
     def __init__(self):
         self.buy = []
         self.sell = []
-        self.sellOrderNumber = 0
-        self.buyOrderNumber = 0
+        self.OrderNumber = 0
  
     def __str__(self):
         return ' '.join([str(i) for i in self.queue])
@@ -20,16 +19,16 @@ class OrderBook(object):
         print(data, buyOrSell)
         dataForInput = []
         if (buyOrSell == "B"):
-            dataForInput.append(self.buyOrderNumber)
-            self.buyOrderNumber += 1
+            dataForInput.append(self.OrderNumber)
+            self.OrderNumber += 1
             dataForInput.append(data[2])
             dataForInput.append(data[3])
             print(dataForInput)
             self.buy.append(dataForInput)
             print(self.buy)
         elif (buyOrSell == "S"):
-            dataForInput.append(self.sellOrderNumber)
-            self.sellOrderNumber += 1
+            dataForInput.append(self.OrderNumber)
+            self.OrderNumber += 1
             dataForInput.append(data[2])
             dataForInput.append(data[3])
             print(dataForInput)
@@ -37,24 +36,45 @@ class OrderBook(object):
             print(self.sell)
  
     # for popping an element based on Priority
-    def delete(self):
+    def delete(self, orderNumber):
+        orderNumber = int (orderNumber)
+        index = -1
+        item = None
         try:
-            placeholder = 0
+            for i in range(len(self.buy)):
+                if (self.buy[i][0] == orderNumber):
+                    index = i
+                    item = self.buy[index]
+                    print("isbuy")
+                    del self.buy[index]
+                    return item
+            if (not item):
+                for i in range(len(self.sell)):
+                    if (self.sell[i][0] == orderNumber):
+                        index = i
+                item = self.sell[index]
+                if (not item):
+                    raise IndexError
+                print ("issell")
+                del self.sell[index]
+                return item
         except IndexError:
-            print()
-            exit()
+            print("Item is not available for delete")
+            return
  
 if __name__ == '__main__':
     myQueue = OrderBook()
     while True:
         user_input = input("Please enter request: ")
+        # check if it is a valid new order
         if (re.search("\ +[B|S|b|s]\ +[1-9]\d*\ +[1-9]\d*\ *$", user_input)):
             myQueue.insert(user_input.split(), user_input.split()[1].upper())
-            print("is a new order")
+        # check if it is a valid request to modify
         elif (re.search("[M|m]\ +[1-9]\d*\ +[1-9]\d*\ +[1-9]\d*\ *$", user_input)):
             print("it is a request to modify")
-        elif (re.search("[D|d]\ +[1-9]\d*\ *$", user_input)):
-            print("it is a request to delete")
+        # check if it is a valid delete request
+        elif (re.search("[D|d]\ +\d*\ *$", user_input)):
+            print(myQueue.delete(user_input.split()[1]))
         elif (user_input == "quit"):
             print ("Goodbye!")
             exit (0)
