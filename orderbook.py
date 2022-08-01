@@ -11,17 +11,63 @@ class OrderBook(object):
         return ' '.join([str(i) for i in self.queue])
  
     # for checking if the queue is empty
-    def isEmpty(self):
-        return len(self.queue) == 0
+    def printOrderBook(self):
+        print ("buy", self.buy)
+        print ("sell", self.sell)
 
     def findMatchForBuy(self, data):
-        print("Find Match for Buy", data)
-        size = data[2]
-        price = data[3]
+        newData = []
+        size = int(data[2])
+        price = int(data[3])
         if (len(self.sell) > 0):
             for index in range(len(self.sell)):
-                if (int(self.sell[index][0]) == int(orderNumber)):
-                    return index
+                if (int(self.sell[index][2]) <= price):
+                    if (int(self.sell[index][1]) > size):
+                        self.sell[index][1] = int(self.sell[index][1]) - size
+                        size = size - int(self.sell[index][1])
+                        print("Matched with sell order number", self.sell[index][0])
+                    elif (self.sell[index][1] == size):
+                        size = size - int(self.sell[index][1])
+                        print("Matched with sell order number", self.sell[index][0])
+                        self.delete(self.sell[index][0])
+                    else:
+                       size = size - int(self.sell[index][1])
+                       print("Matched with sell order number", self.sell[index][0])
+                       self.delete(self.sell[index][0])
+                if (size == 0):
+                    newData.append(1)
+                    newData.append(size)
+                    return (newData)
+        newData.append(0)
+        newData.append(size)
+        return (newData)
+
+    def findMatchForSell(self, data):
+        newData = []
+        size = int(data[2])
+        price = int(data[3])
+        if (len(self.buy) > 0):
+            for index in range(len(self.buy)):
+                if (int(self.buy[index][2]) >= price):
+                    if (int(self.buy[index][1]) > size):
+                        self.buy[index][1] = int(self.buy[index][1]) - size
+                        size = size - int(self.buy[index][1])
+                        print("Matched with buy order number", self.buy[index][0])
+                    elif (self.buy[index][1] == size):
+                        size = size - int(self.buy[index][1])
+                        print("Matched with buy order number", self.buy[index][0])
+                        self.delete(self.buy[index][0])
+                    else:
+                       size = size - int(self.buy[index][1])
+                       print("Matched with buy order number", self.buy[index][0])
+                       self.delete(self.buy[index][0])
+                if (size == 0):
+                    newData.append(1)
+                    newData.append(size)
+                    return (newData)
+        newData.append(0)
+        newData.append(size)
+        return (newData)
 
     #for making array of elements to enter 
     def makeDataForInput(self, orderNumber, data1, data2):
@@ -66,21 +112,23 @@ class OrderBook(object):
  
     # for inserting an element in the queue
     def insert(self, data, buyOrSell):
-        print(data, buyOrSell)
         dataForInput = []
         if (buyOrSell == "B"):
-            #OrderBook.findMatchForBuy(self, data)
-            dataForInput = self.makeDataForInput(-1, data[2], data[3])
-            #enter in queue with price and time priority
-            rightIndex = myOrderBook.findRightBuyIndex(data[3])
-            self.buy.insert(rightIndex, dataForInput)
-            print(self.buy)
+            matchedData = myOrderBook.findMatchForBuy(data)
+            if (int(matchedData[0]) == 0):
+                print(matchedData)
+                dataForInput = self.makeDataForInput(-1, matchedData[1], int(data[3]))
+                #enter in queue with price and time priority
+                rightIndex = myOrderBook.findRightBuyIndex(data[3])
+                self.buy.insert(rightIndex, dataForInput)
         elif (buyOrSell == "S"):
-            dataForInput = self.makeDataForInput(-1, data[2], data[3])
-            #enter with price and time Priority
-            rightIndex = myOrderBook.findRightSellIndex(data[3])
-            self.sell.insert(rightIndex, dataForInput)
-            print(self.sell)
+            matchedData = myOrderBook.findMatchForSell(data)
+            if (int(matchedData[0]) == 0):
+                print(matchedData)
+                dataForInput = self.makeDataForInput(-1, matchedData[1], int(data[3]))
+                #enter with price and time Priority
+                rightIndex = myOrderBook.findRightSellIndex(data[3])
+                self.sell.insert(rightIndex, dataForInput)
 
     # for modifying queue
     def modify(self, orderNumber, newData):
@@ -89,12 +137,10 @@ class OrderBook(object):
             print("item to modify not found")
             return
         index = item[1]
-        print("here to modify", newData, index)
         orderNumber = int(orderNumber)
         myOrderBook.delete(orderNumber)        
         list_ = getattr(self, item[0])
         list_.append(newData)
-        print (list_)
 
  
     # for popping an element based on Priority
@@ -102,7 +148,7 @@ class OrderBook(object):
         orderNumber = int (orderNumber)
         index = -1
         item = None
-        orderDetails = OrderBook.findItemInList(self, orderNumber)
+        orderDetails = myOrderBook.findItemInList(orderNumber)
         print("orderdetails", orderDetails)
         try:
             if (orderDetails == []):
@@ -121,9 +167,10 @@ class OrderBook(object):
 if __name__ == '__main__':
     myOrderBook = OrderBook()
     while True:
+        myOrderBook.printOrderBook()
         user_input = input("Please enter request: ")
         # check if it is a valid new order
-        if (re.search("\ +[B|S|b|s]\ +[1-9]\d*\ +[1-9]\d*\ *$", user_input)):
+        if (re.search("[N|n]\ +[B|S|b|s]\ +[1-9]\d*\ +[1-9]\d*\ *$", user_input)):
             myOrderBook.insert(user_input.split(), user_input.split()[1].upper())
         # check if it is a valid request to modify
         elif (re.search("[M|m]\ +\d*\ +[1-9]\d*\ +[1-9]\d*\ *$", user_input)):
