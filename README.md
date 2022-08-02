@@ -2,7 +2,7 @@
 
 # How to run the program
 Make sure you have Python installed then run:
-``` python orderbook.py
+``` python orderbook.py ```
 
 ## How to use the program
 This program has a make shift stock exchange order book. 
