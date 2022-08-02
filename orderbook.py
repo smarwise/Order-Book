@@ -143,17 +143,17 @@ class OrderBook(object):
 
     #inserts sell order in its rightful place considering the priority rules
     def findRightSellIndex(self, price):
-        print("sell:", self.sell)
         if (len(myOrderBook.sell) == 0):
             return 0
         else:
             for index in range(len(self.sell)-1, -1, -1):
                 if (int(self.sell[index][2]) == int(price)):
                     return index + 1
-                elif (int(self.sell[index][2]) < int(price)):
-                    print("here in elif")
+                else:
                     while (index >= 0):
                         if (int(self.sell[index][2]) < int(price)):
+                            return index + 1
+                        elif (int(self.sell[index][2]) > int(price)):
                             index -= 1
                         else:
                             return index + 1
