@@ -1,10 +1,10 @@
 # Order-Book
 
-#How to run the program
+# How to run the program
 Make sure you have Python installed then run:
 python orderbook.py
 
-##How to use the program
+## How to use the program
 This program has a make shift stock exchange order book. 
 
 You can add orders to the order book by using the expression 
